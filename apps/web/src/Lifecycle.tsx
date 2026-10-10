@@ -1,0 +1,31 @@
+import { useState } from 'react';
+import { ActionIcon, Button, Group, Modal, Stack, Text, Title, Card, Select, TextInput, Textarea, Tooltip } from '@mantine/core';
+import { IconArchive, IconArchiveOff, IconPencil, IconTrash } from '@tabler/icons-react';
+import type { Project, Page } from '@yuanplan/contracts';
+import { api, errorText, useData, confirmNavigation } from './api';
+import { Failure, Loading } from './ui';
+type Resource={id:string;title?:string;name?:string;version:number;archivedAt?:string|null;deletedAt?:string|null};
+export function LifecycleActions({projectId,kind,resource,changed,disabled=false,icons=false,onEdit}:{projectId:string;kind:'project'|'task'|'document';resource:Resource;changed:()=>void;disabled?:boolean;icons?:boolean;onEdit?:()=>void}) {
+ const [action,setAction]=useState<string|null>(null);const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+ const labels:Record<string,string>={delete:'移入回收站',restore:'恢复',archive:kind==='project'?'归档项目':'归档',unarchive:kind==='project'?'重新启用':'取消归档'};
+ const actions=resource.deletedAt?['restore']:kind==='document'?['delete']:[resource.archivedAt?'unarchive':'archive','delete'];
+ function selectAction(value:string){if(confirmNavigation()){setError('');setAction(value);}}
+ const iconActions=<Group gap={2} wrap="nowrap" className="project-icon-actions">
+  {onEdit&&!resource.archivedAt&&<Tooltip label="编辑项目信息" withArrow openDelay={250}><ActionIcon variant="subtle" color="gray" size={32} aria-label={`编辑项目信息：${resource.name}`} onClick={onEdit}><IconPencil size={18}/></ActionIcon></Tooltip>}
+  {actions.map(value=><Tooltip key={value} label={labels[value]} withArrow openDelay={250}><ActionIcon variant="subtle" color={value==='delete'?'red':'gray'} size={32} disabled={disabled} aria-label={`${labels[value]}：${resource.name}`} onClick={()=>selectAction(value)}>{value==='delete'?<IconTrash size={18}/>:value==='archive'?<IconArchive size={18}/>:<IconArchiveOff size={18}/>}</ActionIcon></Tooltip>)}
+ </Group>;
+ const explanation=action==='archive'?(kind==='project'?'归档后项目将变为只读，内容和历史仍保留，可在“我的项目”的“已归档”中重新启用。归档不会将任务标记为完成。':'归档后任务将从日常看板和列表中隐藏，内容只读，可在“已归档任务”中取消归档。'):action==='delete'?(kind==='project'?'项目将移入项目回收站，内容与历史保留，可恢复。':kind==='task'?'内容与历史会保留，可在回收站恢复。父任务会同时移除仍存在的子任务。':'文档与历史会保留，可在内容回收站恢复。'):action==='unarchive'?(kind==='project'?'重新启用后项目可继续编辑，单独归档的任务仍保持归档状态。':'取消归档后任务将重新显示在看板和列表中。'):action==='restore'&&resource.archivedAt?'恢复后仍保持归档状态，需要另行取消归档。':'';
+ return <>{icons?iconActions:<Group>{actions.map(a=><Button key={a} size="xs" variant="light" color={a==='delete'?'red':'gray'} disabled={disabled} onClick={()=>selectAction(a)}>{labels[a]}</Button>)}</Group>}<Modal opened={!!action} onClose={()=>!busy&&setAction(null)} closeOnEscape={!busy} closeOnClickOutside={!busy} withCloseButton={!busy} title={action?labels[action]:''} role="alertdialog"><Stack><Text>确认{action?labels[action]:''}“{resource.title??resource.name}”？{explanation}</Text><Failure error={error}/><Group><Button variant="default" disabled={busy} onClick={()=>setAction(null)}>取消</Button><Button color={action==='delete'?'red':undefined} loading={busy} onClick={async()=>{setBusy(true);setError('');try{await api(`/projects/${projectId}/lifecycle/${kind}/${resource.id}`,{body:{action,expectedVersion:resource.version}});setAction(null);changed();}catch(e){setError(errorText(e));}finally{setBusy(false);}}}>确认</Button></Group></Stack></Modal></>;
+}
+
+export function ProjectContents({project,mode}:{project:Project;mode:'archived'|'deleted'}){
+ const [kind,setKind]=useState('tasks');const [cursor,setCursor]=useState<string|null>(null);
+ const q=useData<Page<Resource>>(`/projects/${project.id}/${kind}?${mode}=true${cursor?`&cursor=${cursor}`:''}`);
+ return <Stack><Text size="sm" c="dimmed">{mode==='archived'?'已归档任务保留内容和历史，取消归档后会重新显示在看板和列表中。':'已移除的任务和文档会保留在这里，可恢复使用。'}</Text>{mode==='deleted'&&<Select label="内容类型" value={kind} allowDeselect={false} data={[{value:'tasks',label:'任务'},{value:'documents',label:'文档'}]} onChange={v=>{setKind(v!);setCursor(null);}}/>}{project.archivedAt&&<Text size="sm">请先在“我的项目”的“已归档”中重新启用项目，再恢复项目内的内容。</Text>}<Failure error={q.error}/>{q.loading?<Loading/>:q.data?.items.map(r=><Card key={r.id} withBorder><Group justify="space-between"><Text>{r.title}</Text><LifecycleActions projectId={project.id} kind={kind==='tasks'?'task':'document'} resource={r} disabled={!!project.archivedAt} changed={q.reload}/></Group></Card>)}{!q.loading&&!q.error&&!q.data?.items.length&&<Text c="dimmed">{mode==='archived'?'暂无已归档任务':'回收站为空'}</Text>}<Group>{cursor&&<Button variant="subtle" onClick={()=>setCursor(null)}>第一页</Button>}{q.data?.nextCursor&&<Button variant="subtle" onClick={()=>setCursor(q.data!.nextCursor)}>下一页</Button>}</Group></Stack>;
+}
+
+export function ProjectSettings({project,changed}:{project:Project;changed:()=>void}){
+ const teams=useData<{id:string;name:string}[]>('/teams');const [name,setName]=useState(project.name);const [description,setDescription]=useState(project.description);const [teamId,setTeamId]=useState<string|null>(project.teamId);const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+ const options=(teams.data??[]).map(t=>({value:t.id,label:t.name}));if(teamId&&!options.some(t=>t.value===teamId))options.push({value:teamId,label:'当前关联团队（无访问权）'});
+ return <Card withBorder><form onSubmit={async e=>{e.preventDefault();setBusy(true);try{await api(`/projects/${project.id}`,{method:'PUT',body:{data:{name,description,teamId},expectedVersion:project.version}});changed();}catch(e){setError(errorText(e));}finally{setBusy(false);}}}><Stack><Title order={4}>项目信息</Title><Failure error={error||teams.error}/><TextInput label="项目名称" required value={name} disabled={!!project.archivedAt} onChange={e=>setName(e.currentTarget.value)}/><Textarea label="项目简介" value={description} disabled={!!project.archivedAt} onChange={e=>setDescription(e.currentTarget.value)}/><Select label="关联团队" clearable searchable data={options} value={teamId} disabled={!!project.archivedAt} onChange={setTeamId}/><Text size="sm" c="dimmed">关联团队不会改变项目成员及其权限。</Text><Button type="submit" loading={busy} disabled={!!project.archivedAt}>保存项目信息</Button></Stack></form></Card>;
+}

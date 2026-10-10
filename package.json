@@ -1,0 +1,47 @@
+{
+  "name": "yuanplan",
+  "version": "0.1.0",
+  "description": "Self-hosted project collaboration with task boards, a project wiki, and MCP integration.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhylq/YuanPlan.git"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @yuanplan/server\" \"npm run dev -w @yuanplan/web\"",
+    "build": "npm run licenses:generate && npm run build -w @yuanplan/web && npm run build -w @yuanplan/server && npm run build -w @yuanplan/mcp-stdio",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:codex-mcp": "node --import tsx scripts/check-codex-mcp.mjs",
+    "db:migrate": "tsx apps/server/src/db/migrate.ts",
+    "start": "node apps/server/dist/index.js",
+    "ops": "tsx apps/server/src/cli.ts",
+    "ops:production": "node apps/server/dist/cli.js",
+    "bundle:report": "node scripts/bundle-report.mjs",
+    "benchmark:tasks": "node scripts/benchmark-task-list.mjs",
+    "licenses:generate": "node scripts/generate-license-notices.mjs",
+    "check:release": "node scripts/check-release.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.3",
+    "@types/nodemailer": "8.0.2",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "concurrently": "10.0.6",
+    "esbuild": "0.28.2",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "5.0.1"
+  }
+}

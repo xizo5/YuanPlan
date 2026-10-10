@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">YuanPlan 几何小猿标志草案</title>
+  <desc id="desc">深绿色圆角方形内，以圆耳朵和简洁面部组成小猿头像</desc>
+  <rect width="96" height="96" rx="20" fill="#2D7257"/>
+  <circle cx="22" cy="49" r="12" fill="#fff"/>
+  <circle cx="74" cy="49" r="12" fill="#fff"/>
+  <circle cx="21" cy="49" r="4" fill="#DDEFE6"/>
+  <circle cx="75" cy="49" r="4" fill="#DDEFE6"/>
+  <path d="M25 39c0-15 9-24 23-24s23 9 23 24v18c0 15-9 24-23 24S25 72 25 57V39Z" fill="#fff"/>
+  <path d="M31 54c0-10 5-16 12-16 3 0 5 2 5 5 0-3 2-5 5-5 7 0 12 6 12 16v7c0 10-7 16-17 16s-17-6-17-16v-7Z" fill="#DDEFE6"/>
+  <circle cx="39" cy="50" r="3" fill="#2D7257"/>
+  <circle cx="57" cy="50" r="3" fill="#2D7257"/>
+  <path d="m44 60 4 3 4-3" fill="none" stroke="#2D7257" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

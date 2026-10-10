@@ -1,0 +1,90 @@
+name: yuanplan
+
+x-image: &image
+  image: yuanplan:local
+  build: .
+
+x-config: &config
+  NODE_ENV: production
+  APP_URL: ${APP_URL:?Set the public HTTPS APP_URL}
+  AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET}
+  SETUP_TOKEN: ${SETUP_TOKEN:?Set SETUP_TOKEN}
+  MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-20971520}
+  UPLOAD_DIR: /data/uploads
+  WEB_DIST: apps/web/dist
+
+services:
+  db:
+    image: yuanplan-db:local
+    build:
+      context: .
+      target: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: yuanplan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      MIGRATION_DB_PASSWORD: ${MIGRATION_DB_PASSWORD:?Set MIGRATION_DB_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set APP_DB_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./deploy/init-db.sh:/docker-entrypoint-initdb.d/10-yuanplan.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d yuanplan"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  migrate:
+    <<: *image
+    environment:
+      MIGRATION_DATABASE_URL: postgresql://yuanplan_migrator:${MIGRATION_DB_PASSWORD:?}@db:5432/yuanplan
+    command: [node, deploy/migrate.mjs]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+  app:
+    <<: *image
+    environment:
+      <<: *config
+      DATABASE_URL: postgresql://yuanplan_app:${APP_DB_PASSWORD:?}@db:5432/yuanplan
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-18420}:18420"
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:18420/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    init: true
+    restart: unless-stopped
+  ops:
+    <<: *image
+    profiles: [ops]
+    environment:
+      <<: *config
+      DATABASE_URL: postgresql://yuanplan_migrator:${MIGRATION_DB_PASSWORD:?}@db:5432/yuanplan
+      MIGRATION_DATABASE_URL: postgresql://yuanplan_migrator:${MIGRATION_DB_PASSWORD:?}@db:5432/yuanplan
+      RESTORE_DATABASE_URL: ${RESTORE_DATABASE_URL:-}
+    command: [node, apps/server/dist/cli.js, --help]
+    volumes:
+      - uploads:/data/uploads
+      - backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    init: true
+
+volumes:
+  database:
+  uploads:
+  backups:

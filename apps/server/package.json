@@ -1,0 +1,21 @@
+{
+  "name": "@yuanplan/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=../../.env --import tsx src/index.ts",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.1.1",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "better-auth": "1.7.5",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.13.8",
+    "nodemailer": "10.0.10",
+    "pg": "8.23.0",
+    "zod": "4.6.5"
+  }
+}

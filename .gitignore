@@ -1,0 +1,37 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.env.*.local
+.data/
+.cache/
+.npm-cache/
+coverage/
+test-results/
+playwright-report/
+*.log
+
+# Local IDE settings and operating-system metadata
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tsbuildinfo
+
+# Agent configuration, credentials and private archives
+.codex/
+.agents/
+.vscode/
+*.pem
+*.key
+*.dump
+*.dpapi
+*.bundle
+__pycache__/
+*.pyc
+apps/web/public/third-party-notices.txt
+*.env
+*.tar
+*.tar.gz
+*.zip

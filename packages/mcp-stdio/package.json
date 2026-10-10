@@ -1,0 +1,14 @@
+{
+  "name": "@yuanplan/mcp-stdio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Local stdio bridge for the YuanPlan HTTP MCP service",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1"
+  }
+}

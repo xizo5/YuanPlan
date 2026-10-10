@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">YuanPlan 小猿原版与精修版对比</title>
+  <desc id="desc">保留原版轮廓，仅调整眼睛和微笑的精修版</desc>
+  <defs>
+    <symbol id="base" viewBox="0 0 96 96">
+      <rect width="96" height="96" rx="20" fill="#2D7257"/>
+      <circle cx="22" cy="49" r="12" fill="#fff"/><circle cx="74" cy="49" r="12" fill="#fff"/>
+      <circle cx="21" cy="49" r="4" fill="#DDEFE6"/><circle cx="75" cy="49" r="4" fill="#DDEFE6"/>
+      <path d="M25 39c0-15 9-24 23-24s23 9 23 24v18c0 15-9 24-23 24S25 72 25 57V39Z" fill="#fff"/>
+      <path d="M31 54c0-10 5-16 12-16 3 0 5 2 5 5 0-3 2-5 5-5 7 0 12 6 12 16v7c0 10-7 16-17 16s-17-6-17-16v-7Z" fill="#DDEFE6"/>
+      <circle cx="39" cy="50" r="3" fill="#2D7257"/><circle cx="57" cy="50" r="3" fill="#2D7257"/>
+      <path d="m44 60 4 3 4-3" fill="none" stroke="#2D7257" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="refined" viewBox="0 0 96 96">
+      <rect width="96" height="96" rx="20" fill="#2D7257"/>
+      <circle cx="22" cy="49" r="12" fill="#fff"/><circle cx="74" cy="49" r="12" fill="#fff"/>
+      <circle cx="21" cy="49" r="4" fill="#DDEFE6"/><circle cx="75" cy="49" r="4" fill="#DDEFE6"/>
+      <path d="M25 39c0-15 9-24 23-24s23 9 23 24v18c0 15-9 24-23 24S25 72 25 57V39Z" fill="#fff"/>
+      <path d="M31 54c0-10 5-16 12-16 3 0 5 2 5 5 0-3 2-5 5-5 7 0 12 6 12 16v7c0 10-7 16-17 16s-17-6-17-16v-7Z" fill="#DDEFE6"/>
+      <circle cx="39" cy="50" r="3.5" fill="#2D7257"/><circle cx="57" cy="50" r="3.5" fill="#2D7257"/>
+      <circle cx="38" cy="49" r="1" fill="#fff"/><circle cx="56" cy="49" r="1" fill="#fff"/>
+      <path d="M43 62c2 3 8 3 10 0" fill="none" stroke="#2D7257" stroke-width="2.8" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+  <rect width="960" height="560" fill="#F6F8F7"/>
+  <text x="48" y="63" fill="#25362C" font-family="Arial,sans-serif" font-size="28" font-weight="700">YuanPlan · 小猿精修</text>
+  <text x="48" y="92" fill="#73827B" font-family="Arial,sans-serif" font-size="15">保留原来的头型、耳朵和脸型，只让表情柔和一点</text>
+
+  <rect x="48" y="125" width="418" height="386" rx="16" fill="#fff" stroke="#DFE8E2"/>
+  <text x="76" y="166" fill="#25362C" font-family="Arial,sans-serif" font-size="22" font-weight="700">第一版</text>
+  <use href="#base" xlink:href="#base" x="184" y="194" width="144" height="144"/>
+  <line x1="76" y1="361" x2="438" y2="361" stroke="#E8EEEA"/>
+  <text x="76" y="395" fill="#75847B" font-family="Arial,sans-serif" font-size="13">侧栏 30 px</text>
+  <use href="#base" xlink:href="#base" x="76" y="416" width="30" height="30"/>
+  <text x="117" y="440" fill="#25362C" font-family="Arial,sans-serif" font-size="20" font-weight="700">YuanPlan</text>
+
+  <rect x="494" y="125" width="418" height="386" rx="16" fill="#fff" stroke="#DFE8E2"/>
+  <text x="522" y="166" fill="#25362C" font-family="Arial,sans-serif" font-size="22" font-weight="700">精修版</text>
+  <use href="#refined" xlink:href="#refined" x="630" y="194" width="144" height="144"/>
+  <line x1="522" y1="361" x2="884" y2="361" stroke="#E8EEEA"/>
+  <text x="522" y="395" fill="#75847B" font-family="Arial,sans-serif" font-size="13">侧栏 30 px</text>
+  <use href="#refined" xlink:href="#refined" x="522" y="416" width="30" height="30"/>
+  <text x="563" y="440" fill="#25362C" font-family="Arial,sans-serif" font-size="20" font-weight="700">YuanPlan</text>
+</svg>

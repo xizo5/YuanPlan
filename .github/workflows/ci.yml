@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Install Node for source checks
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - name: Reject tracked private files and invalid public source
+        run: node scripts/check-release.mjs
+      - name: Verify clean install, safety, types, tests, build and service
+        run: docker compose -f compose.ci.yaml -p yuanplan-ci-${{ github.run_id }}-${{ github.run_attempt }} run --build --rm verify
+      - name: Remove only this run's disposable services
+        if: always()
+        run: docker compose -f compose.ci.yaml -p yuanplan-ci-${{ github.run_id }}-${{ github.run_attempt }} down --volumes --remove-orphans

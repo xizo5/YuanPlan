@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">YuanPlan 产品标志草案</title>
+  <desc id="desc">Y 形路径标志的侧栏、横版和单色应用示意</desc>
+  <rect width="960" height="540" fill="#F6F8F7"/>
+  <text x="48" y="65" fill="#28332E" font-family="Arial,sans-serif" font-size="26" font-weight="700">YuanPlan · 标志草案</text>
+  <text x="48" y="93" fill="#73827B" font-family="Arial,sans-serif" font-size="15">路径汇聚为 Y，代表项目、任务和文档在同一空间推进</text>
+
+  <rect x="48" y="128" width="864" height="180" rx="14" fill="#fff" stroke="#E2EAE5"/>
+  <rect x="82" y="166" width="104" height="104" rx="22" fill="#2D7257"/>
+  <path d="m109 192 25 26 25-26m-25 26v27" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="109" cy="192" r="6" fill="#fff"/><circle cx="159" cy="192" r="6" fill="#fff"/><circle cx="134" cy="245" r="6" fill="#fff"/>
+  <text x="213" y="228" fill="#22362C" font-family="Arial,sans-serif" font-size="52" font-weight="700" letter-spacing="-2">YuanPlan</text>
+  <text x="216" y="260" fill="#77847D" font-family="Arial,sans-serif" font-size="16">项目 · 任务 · 文档</text>
+  <text x="720" y="275" fill="#8B9990" font-family="Arial,sans-serif" font-size="13">横版组合</text>
+
+  <rect x="48" y="330" width="418" height="160" rx="14" fill="#fff" stroke="#E2EAE5"/>
+  <text x="72" y="364" fill="#73827B" font-family="Arial,sans-serif" font-size="14">侧栏实际尺寸</text>
+  <rect x="72" y="387" width="30" height="30" rx="6" fill="#2D7257"/>
+  <path d="m80 395 7 7 7-7m-7 7v8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="80" cy="395" r="1.8" fill="#fff"/><circle cx="94" cy="395" r="1.8" fill="#fff"/><circle cx="87" cy="410" r="1.8" fill="#fff"/>
+  <text x="114" y="410" fill="#22362C" font-family="Arial,sans-serif" font-size="19" font-weight="700">YuanPlan</text>
+  <text x="72" y="456" fill="#73827B" font-family="Arial,sans-serif" font-size="13">保持现有侧栏布局与深绿色</text>
+
+  <rect x="486" y="330" width="426" height="160" rx="14" fill="#2D7257"/>
+  <text x="510" y="364" fill="#D5E8DF" font-family="Arial,sans-serif" font-size="14">单色反白</text>
+  <path d="m632 391 40 40 40-40m-40 40v40" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="632" cy="391" r="7" fill="#fff"/><circle cx="712" cy="391" r="7" fill="#fff"/><circle cx="672" cy="471" r="7" fill="#fff"/>
+</svg>

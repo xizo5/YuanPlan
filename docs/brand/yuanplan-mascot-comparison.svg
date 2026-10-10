@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 960 630" role="img" aria-labelledby="title desc">
+  <title id="title">YuanPlan 动物与机器人标志方向对比</title>
+  <desc id="desc">几何小猿和 Y 天线机器人各自的大图、侧栏尺寸及品牌组合</desc>
+  <defs>
+    <symbol id="monkey" viewBox="0 0 96 96">
+      <rect width="96" height="96" rx="20" fill="#2D7257"/>
+      <circle cx="22" cy="49" r="12" fill="#fff"/><circle cx="74" cy="49" r="12" fill="#fff"/>
+      <circle cx="21" cy="49" r="4" fill="#DDEFE6"/><circle cx="75" cy="49" r="4" fill="#DDEFE6"/>
+      <path d="M25 39c0-15 9-24 23-24s23 9 23 24v18c0 15-9 24-23 24S25 72 25 57V39Z" fill="#fff"/>
+      <path d="M31 54c0-10 5-16 12-16 3 0 5 2 5 5 0-3 2-5 5-5 7 0 12 6 12 16v7c0 10-7 16-17 16s-17-6-17-16v-7Z" fill="#DDEFE6"/>
+      <circle cx="39" cy="50" r="3" fill="#2D7257"/><circle cx="57" cy="50" r="3" fill="#2D7257"/>
+      <path d="m44 60 4 3 4-3" fill="none" stroke="#2D7257" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="robot" viewBox="0 0 96 96">
+      <rect width="96" height="96" rx="20" fill="#2D7257"/>
+      <path d="m37 15 11 10 11-10M48 25v8" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="17" y="43" width="8" height="22" rx="4" fill="#DDEFE6"/><rect x="71" y="43" width="8" height="22" rx="4" fill="#DDEFE6"/>
+      <rect x="23" y="32" width="50" height="44" rx="13" fill="#fff"/>
+      <rect x="34" y="47" width="8" height="9" rx="3" fill="#2D7257"/><rect x="54" y="47" width="8" height="9" rx="3" fill="#2D7257"/>
+      <path d="M40 64c4 3 12 3 16 0" fill="none" stroke="#2D7257" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+  <rect width="960" height="630" fill="#F6F8F7"/>
+  <text x="48" y="62" fill="#25362C" font-family="Arial,sans-serif" font-size="28" font-weight="700">YuanPlan · 形象标志方向</text>
+  <text x="48" y="91" fill="#73827B" font-family="Arial,sans-serif" font-size="15">同一配色、同一尺寸下比较：左侧偏协作亲和，右侧偏智能工具</text>
+
+  <rect x="48" y="126" width="418" height="452" rx="16" fill="#fff" stroke="#DFE8E2"/>
+  <text x="76" y="168" fill="#25362C" font-family="Arial,sans-serif" font-size="22" font-weight="700">A · 几何小猿</text>
+  <text x="76" y="194" fill="#75847B" font-family="Arial,sans-serif" font-size="14">Yuan / 猿的谐音，温和、易记</text>
+  <use href="#monkey" xlink:href="#monkey" x="184" y="222" width="144" height="144"/>
+  <line x1="76" y1="391" x2="438" y2="391" stroke="#E8EEEA"/>
+  <text x="76" y="427" fill="#75847B" font-family="Arial,sans-serif" font-size="13">侧栏 30 px</text>
+  <use href="#monkey" xlink:href="#monkey" x="76" y="445" width="30" height="30"/>
+  <text x="117" y="469" fill="#25362C" font-family="Arial,sans-serif" font-size="20" font-weight="700">YuanPlan</text>
+  <text x="76" y="541" fill="#2D7257" font-family="Arial,sans-serif" font-size="14">适合做整个产品的识别符号</text>
+
+  <rect x="494" y="126" width="418" height="452" rx="16" fill="#fff" stroke="#DFE8E2"/>
+  <text x="522" y="168" fill="#25362C" font-family="Arial,sans-serif" font-size="22" font-weight="700">B · Y 天线机器人</text>
+  <text x="522" y="194" fill="#75847B" font-family="Arial,sans-serif" font-size="14">Y 形天线延续上一版，科技感更强</text>
+  <use href="#robot" xlink:href="#robot" x="630" y="222" width="144" height="144"/>
+  <line x1="522" y1="391" x2="884" y2="391" stroke="#E8EEEA"/>
+  <text x="522" y="427" fill="#75847B" font-family="Arial,sans-serif" font-size="13">侧栏 30 px</text>
+  <use href="#robot" xlink:href="#robot" x="522" y="445" width="30" height="30"/>
+  <text x="563" y="469" fill="#25362C" font-family="Arial,sans-serif" font-size="20" font-weight="700">YuanPlan</text>
+  <text x="522" y="541" fill="#2D7257" font-family="Arial,sans-serif" font-size="14">更适合作为 AI 功能的形象</text>
+</svg>

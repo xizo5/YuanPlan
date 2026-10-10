@@ -1,0 +1,46 @@
+import 'dotenv/config';
+import { chromium, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+const base=process.env.APP_URL??'http://localhost:5173';
+if(!['localhost','127.0.0.1'].includes(new URL(base).hostname))throw new Error('Local development instance required');
+const account=JSON.parse(await readFile('.data/preview-account.json','utf8'));
+const browser=await chromium.launch({executablePath:process.env.CHROME_PATH??'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
+const context=await browser.newContext({viewport:{width:1440,height:1000}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());
+async function api(path,body,method=body?'POST':'GET'){const r=await context.request.fetch(`${base}/api${path}`,{method,headers:{Origin:base,'Idempotency-Key':randomUUID()},...(body?{data:body}:{})});if(!r.ok())throw new Error(`${path}: ${r.status()} ${await r.text()}`);return r.json();}
+try{
+ await api('/auth/sign-in/email',{email:account.email,password:account.password});
+ const p=await api('/projects',{name:`功能回归 ${Date.now()}`});
+ const task=await api(`/projects/${p.id}/tasks`,{title:'父任务 Alpha',dueDate:'2026-12-15'});
+ const child=await api(`/projects/${p.id}/tasks`,{title:'子任务 Beta',parentId:task.id});
+ await api(`/projects/${p.id}/tasks`,{title:'排序 Gamma'});
+ await page.goto(`${base}/projects/${p.id}`);await page.locator('.task-card').filter({has:page.getByText('父任务 Alpha',{exact:true})}).waitFor();
+ await expect(page.getByRole('button',{name:/^上移 /})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'移动任务 排序 Gamma',exact:true})).toBeVisible();
+ await page.locator('.task-card').filter({has:page.getByText('父任务 Alpha',{exact:true})}).click();
+ await page.getByRole('button',{name:'子任务 Beta',exact:true}).click();await expect(page.getByLabel('任务标题',{exact:true})).toHaveValue('子任务 Beta');
+ await page.getByLabel('任务标题',{exact:true}).fill('子任务已编辑');await page.getByRole('button',{name:'保存任务',exact:true}).click();await page.getByText('版本 2',{exact:false}).waitFor();
+ await page.getByRole('button',{name:'返回父任务',exact:true}).click();await expect(page.getByLabel('任务标题',{exact:true})).toHaveValue('父任务 Alpha');
+ await page.getByLabel('添加评论',{exact:true}).fill('讨论验证');await page.getByRole('button',{name:'发送评论',exact:true}).click();await expect(page.getByText('讨论验证',{exact:true})).toBeVisible();
+ await page.keyboard.press('Escape');
+ const doc=await api(`/projects/${p.id}/documents`,{title:'文档回归',content:{type:'doc',content:[{type:'paragraph',content:[{type:'text',text:'初始正文'}]}]}});
+ await page.goto(`${base}/projects/${p.id}?document=${doc.id}`);await page.locator('.tiptap').waitFor();
+ await page.route(`**/api/projects/${p.id}/documents/${doc.id}`,route=>route.request().method()==='PUT'?route.abort('failed'):route.continue());
+ await page.getByLabel('文档标题',{exact:true}).fill('离线草稿');await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByText('保存失败',{exact:true}).waitFor();
+ await page.reload();await page.getByText('发现此账号的本地草稿',{exact:true}).waitFor();
+ await page.unroute(`**/api/projects/${p.id}/documents/${doc.id}`);await page.getByRole('button',{name:'恢复本地草稿',exact:true}).click();await page.getByText('已保存',{exact:true}).waitFor({timeout:10000});await expect(page.getByLabel('文档标题',{exact:true})).toHaveValue('离线草稿');
+ const current=await api(`/projects/${p.id}/documents/${doc.id}`);await api(`/projects/${p.id}/documents/${doc.id}`,{data:{title:'远端改动'},expectedVersion:current.version},'PUT');
+ await page.getByLabel('文档标题',{exact:true}).fill('本地冲突内容');await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByText(/版本冲突：服务器已更新/).waitFor();
+ await page.getByRole('button',{name:'保留本地内容继续编辑',exact:true}).click();await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByText('已保存',{exact:true}).waitFor();expect((await api(`/projects/${p.id}/documents/${doc.id}`)).title).toBe('本地冲突内容');
+ await page.getByRole('button',{name:'插入表格',exact:true}).click();await expect(page.locator('.tiptap table')).toHaveCount(1);await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByText('已保存',{exact:true}).waitFor();
+ await page.locator('input[type=file]').setInputFiles({name:'test.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR3sAAAAASUVORK5CYII=','base64')});
+ await expect(page.locator('.tiptap img')).toHaveCount(1);await page.getByRole('button',{name:'保存',exact:true}).click();await page.getByText('已保存',{exact:true}).waitFor();
+ await page.goto(`${base}/projects/${p.id}?task=${task.id}`);await page.getByRole('combobox',{name:'选择文档',exact:true}).click();await page.getByRole('option',{name:'本地冲突内容',exact:true}).click();await page.getByRole('button',{name:'关联',exact:true}).click();await page.getByRole('button',{name:'本地冲突内容',exact:true}).click();await page.getByRole('button',{name:'父任务 Alpha',exact:true}).waitFor();
+ await page.getByRole('button',{name:'父任务 Alpha',exact:true}).click();await expect(page.getByLabel('任务标题',{exact:true})).toHaveValue('父任务 Alpha');await page.getByRole('button',{name:'移入回收站',exact:true}).click();await page.getByRole('button',{name:'确认',exact:true}).click();await page.getByRole('tab',{name:'项目管理',exact:true}).click();await page.getByRole('button',{name:'恢复',exact:true}).first().click();await page.getByRole('button',{name:'确认',exact:true}).click();
+ await expect.poll(async()=>{try{return (await api(`/projects/${p.id}/tasks/${task.id}`)).deletedAt;}catch{return 'deleted';}}).toBeNull();
+ await page.goto(`${base}/projects/${p.id}`);
+ await page.getByRole('tab',{name:'项目管理',exact:true}).click();await page.getByRole('button',{name:'归档',exact:true}).click();await page.getByRole('button',{name:'确认',exact:true}).click();await page.getByRole('heading',{name:'我的项目',exact:true}).waitFor();
+ await page.goto(`${base}/projects/${p.id}`);await page.getByRole('tab',{name:'项目管理',exact:true}).click();await page.getByRole('button',{name:'取消归档',exact:true}).click();await page.getByRole('button',{name:'确认',exact:true}).click();await page.getByRole('heading',{name:'我的项目',exact:true}).waitFor();
+ if(errors.length)throw new Error(errors.join('\n'));
+ console.log('Feature regression passed: drag handle, subtask editing, activity, draft reload, conflict resolution, tables, images, document links, trash restore, project archive/unarchive.');
+}catch(e){await page.screenshot({path:'.data/feature-regression-failure.png',fullPage:true});console.error(await page.locator('body').innerText());throw e;}finally{await browser.close();}
