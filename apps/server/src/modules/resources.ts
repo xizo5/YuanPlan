@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm';
 import { taskInput, documentInput, versionSchema, statuses, priorities, type Task, type Document, type TaskStatus } from '@yuanplan/contracts';
 import { emptyDoc, validateDoc, docText, imageIds, fromMarkdown, toMarkdown } from '@yuanplan/editor-schema';
 import { db, rows, one, type Database } from '../db/index.js';
-import { mutate, audit, read, liveUser, access, checkVersion, paging, page, type Actor, type Context } from './core.js';
+import { mutate, audit, read, liveUser, access, checkVersion, paging, page, credentialProjectFilter, type Actor, type Context } from './core.js';
 import { assert, AppError } from '../lib/errors.js';
 
 import { ensureLabels } from './labels.js';
@@ -44,7 +44,7 @@ export async function myTasks(actor: Actor, input: unknown = {}) {
     ${options.query ? sql`AND t.title ILIKE ${'%' + escapeLike(options.query) + '%'}` : sql``}
     ${options.status ? sql`AND t.status=${options.status}` : sql``}
     ${options.priority ? sql`AND t.priority=${options.priority}` : sql``}
-    ${actor.credentialId ? sql`AND EXISTS(SELECT 1 FROM credential_projects cp WHERE cp.project_id=p.id AND cp.credential_id=${actor.credentialId})` : sql``}`;
+    ${credentialProjectFilter(actor, sql`p.id`)}`;
   const from = sql`FROM tasks t JOIN projects p ON p.id=t.project_id JOIN project_members m ON m.project_id=p.id WHERE ${scope}`;
   const total = (await one<{ count: number }>(db, sql`SELECT count(*)::int AS count ${from}`))!.count;
   const currentPage = Math.min(options.page, Math.max(1, Math.ceil(total / options.pageSize)));

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { sql } from 'drizzle-orm';
+import { sql, type SQL } from 'drizzle-orm';
 import { db, rows, one, type Database, type Transaction } from '../db/index.js';
 import { assert, AppError } from '../lib/errors.js';
 import { digest } from '../lib/crypto.js';
@@ -26,11 +26,16 @@ export async function access(database: Database, actor: Actor, projectId: string
   if (mode === 'admin') assert(member.role === 'admin', 403, 'FORBIDDEN', '需要项目管理员权限');
   if (mode !== 'read' && !options.allowArchived) assert(!project.archivedAt && !project.deletedAt, 409, 'PROJECT_READONLY', '项目已归档或删除，当前为只读');
   if (actor.credentialId) {
-    const c = await one<{ scope: string }>(database, sql`SELECT c.scope FROM api_credentials c JOIN credential_projects cp ON cp.credential_id=c.id WHERE c.id=${actor.credentialId} AND c.user_id=${actor.userId} AND cp.project_id=${projectId} AND c.revoked_at IS NULL AND (c.expires_at IS NULL OR c.expires_at>now())`);
+    const c = await one<{ scope: string }>(database, sql`SELECT c.scope FROM api_credentials c WHERE c.id=${actor.credentialId} AND c.user_id=${actor.userId} AND c.revoked_at IS NULL AND (c.expires_at IS NULL OR c.expires_at>now()) AND (c.all_projects OR EXISTS(SELECT 1 FROM credential_projects cp WHERE cp.credential_id=c.id AND cp.project_id=${projectId}))`);
     assert(c && (mode === 'read' || c.scope === 'write'), 403, 'CREDENTIAL_SCOPE', '凭据未获此操作授权');
     assert(mode !== 'admin', 403, 'CREDENTIAL_SCOPE', 'MCP 凭据不支持管理操作');
   }
   return member.role;
+}
+/** Credential project visibility for list queries: an all-projects credential sees every project its owner belongs to. */
+export function credentialProjectFilter(actor: Actor, projectColumn: SQL): SQL {
+  if (!actor.credentialId) return sql``;
+  return sql`AND (EXISTS(SELECT 1 FROM api_credentials c WHERE c.id=${actor.credentialId} AND c.all_projects AND c.revoked_at IS NULL AND (c.expires_at IS NULL OR c.expires_at>now())) OR EXISTS(SELECT 1 FROM credential_projects cp WHERE cp.credential_id=${actor.credentialId} AND cp.project_id=${projectColumn}))`;
 }
 export async function read<T>(actor: Actor, projectId: string, fn: (tx: Transaction) => Promise<T>): Promise<T> {
   return db.transaction(async tx => { await liveUser(tx, actor, true); await access(tx, actor, projectId); return fn(tx); }, { isolationLevel: 'repeatable read' });

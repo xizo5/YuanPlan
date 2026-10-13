@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { projectInput, type Project, type Member, type User, type Role } from '@yuanplan/contracts';
 import { db, rows, one, type Database } from '../db/index.js';
-import { access, liveUser, mutate, audit, read, checkVersion, type Actor, type Context } from './core.js';
+import { access, credentialProjectFilter, liveUser, mutate, audit, read, checkVersion, type Actor, type Context } from './core.js';
 import { assert } from '../lib/errors.js';
 
 const projectPageInput = z.object({
@@ -21,7 +21,7 @@ export async function listProjectPage(actor: Actor, input: unknown) {
     AND ${options.status === 'deleted' ? sql`p.deleted_at IS NOT NULL AND m.role='admin'` : sql`p.deleted_at IS NULL`}
     ${options.status === 'active' ? sql`AND p.archived_at IS NULL` : options.status === 'archived' ? sql`AND p.archived_at IS NOT NULL` : sql``}
     ${options.query ? sql`AND p.name ILIKE ${`%${keyword}%`}` : sql``}
-    ${actor.credentialId ? sql`AND EXISTS(SELECT 1 FROM credential_projects cp WHERE cp.project_id=p.id AND cp.credential_id=${actor.credentialId})` : sql``}`;
+    ${credentialProjectFilter(actor, sql`p.id`)}`;
   const total = (await one<{count:number}>(db, sql`SELECT count(*)::int AS count FROM projects p JOIN project_members m ON m.project_id=p.id WHERE ${scope}`))!.count;
   const page = Math.min(options.page, Math.max(1, Math.ceil(total / options.pageSize)));
   const items = await rows<Project>(db, sql`SELECT p.*,m.role,
@@ -34,7 +34,7 @@ export async function listProjectPage(actor: Actor, input: unknown) {
 
 export async function listProjects(actor: Actor, includeDeleted = false) {
   await liveUser(db, actor);
-  return rows<Project>(db, sql`SELECT p.*,m.role,(SELECT count(*)::int FROM tasks t WHERE t.project_id=p.id AND t.deleted_at IS NULL AND t.parent_id IS NULL) task_count,(SELECT count(*)::int FROM tasks t WHERE t.project_id=p.id AND t.deleted_at IS NULL AND t.parent_id IS NULL AND t.status='done') completed_count FROM projects p JOIN project_members m ON m.project_id=p.id AND m.user_id=${actor.userId} WHERE ${includeDeleted ? sql`m.role='admin'` : sql`p.deleted_at IS NULL`} ${actor.credentialId ? sql`AND EXISTS(SELECT 1 FROM credential_projects cp WHERE cp.project_id=p.id AND cp.credential_id=${actor.credentialId})` : sql``} ORDER BY p.created_at DESC LIMIT 200`);
+  return rows<Project>(db, sql`SELECT p.*,m.role,(SELECT count(*)::int FROM tasks t WHERE t.project_id=p.id AND t.deleted_at IS NULL AND t.parent_id IS NULL) task_count,(SELECT count(*)::int FROM tasks t WHERE t.project_id=p.id AND t.deleted_at IS NULL AND t.parent_id IS NULL AND t.status='done') completed_count FROM projects p JOIN project_members m ON m.project_id=p.id AND m.user_id=${actor.userId} WHERE ${includeDeleted ? sql`m.role='admin'` : sql`p.deleted_at IS NULL`} ${credentialProjectFilter(actor, sql`p.id`)} ORDER BY p.created_at DESC LIMIT 200`);
 }
 export async function getProject(actor: Actor, projectId: string) {
   return read(actor, projectId, async tx => (await one<Project>(tx, sql`SELECT p.*,m.role FROM projects p JOIN project_members m ON m.project_id=p.id WHERE p.id=${projectId} AND m.user_id=${actor.userId}`))!);
