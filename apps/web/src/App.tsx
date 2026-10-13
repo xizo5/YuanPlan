@@ -20,7 +20,7 @@ export function App() {
   if (session.loading || state.loading) return <Loading/>;
   if (!state.data) return <Stack p="xl"><Failure error={state.error}/><Button onClick={() => { state.reload(); session.reload(); }}>重试连接</Button></Stack>;
   if (!session.data || !state.data.initialized || path.startsWith('/recover') || path.startsWith('/verify') || path.startsWith('/forgot')) return <Auth state={state.data} onLogin={() => { session.reload(); state.reload(); }}/ >;
-  const section = path.split('/')[1]; const projectId = path.split('/')[2]?.split('?')[0];
+  const routePath = path.split('?')[0]; const section = routePath.split('/')[1]; const projectId = routePath.split('/')[2];
   const logout = async () => { if (!confirmNavigation()) return; await api('/auth/sign-out', { body: {} }); clearDrafts(session.data!.id); session.setData(undefined); navigate('/'); };
   return <UserContext.Provider value={session.data.id}>
     <NotificationProvider key={session.data.id}>
