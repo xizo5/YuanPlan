@@ -4,6 +4,9 @@ const env = z.object({
   NODE_ENV: z.enum(['development','production','test']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(18420),
   APP_URL: z.string().url().default('http://localhost:5173'),
+  // 仅用于内网 HTTP 部署：关闭 Secure Cookie 标志，否则浏览器不会在 http:// 页面保存会话。
+  // 一旦改用 HTTPS 访问，必须设回 false。
+  INSECURE_HTTP: z.enum(['true','false']).default('false').transform(v => v === 'true'),
   DATABASE_URL: z.string().min(1), AUTH_SECRET: z.string().min(32),
   SETUP_TOKEN: z.string().min(24),
   UPLOAD_DIR: z.string().default('.data/uploads'), WEB_DIST: z.string().default('apps/web/dist'),

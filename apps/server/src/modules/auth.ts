@@ -9,6 +9,6 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: true, disableSignUp: true, minPasswordLength: 10, maxPasswordLength: 128 },
   user: { additionalFields: { isAdmin: { type: 'boolean', defaultValue: false, input: false }, disabled: { type: 'boolean', defaultValue: false, input: false } } },
   session: { expiresIn: 60 * 60 * 24 * 7, cookieCache: { enabled: false } },
-  advanced: { useSecureCookies: config.NODE_ENV === 'production' },
+  advanced: { useSecureCookies: config.NODE_ENV === 'production' && !config.INSECURE_HTTP },
   rateLimit: { enabled: true, window: 60, max: 30 },
 });
